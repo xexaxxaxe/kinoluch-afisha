@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}Афиша{% endblock %}
+
+{% block content %}
+  <h1>Афиша</h1>
+
+  <div class="days">
+    {% for d in days %}
+      <a class="day {% if d == day %}day--active{% endif %}"
+         href="{{ url_for('schedule.index', day=d.isoformat()) }}">{{ d|day }}</a>
+    {% endfor %}
+  </div>
+
+  {% if movies %}
+    {% for entry in movies %}
+      <section class="movie">
+        <div class="movie__head">
+          <h2>{{ entry['movie'].title }} <span class="age">{{ entry['movie'].age }}</span></h2>
+          <p class="muted">{{ entry['movie'].duration_min }} мин · {{ entry['movie'].description }}</p>
+        </div>
+        <div class="slots">
+          {% for item in entry['showtimes'] %}
+            {% set st = item['showtime'] %}
+            <a class="slot" href="{{ url_for('schedule.showtime', showtime_id=st.id) }}">
+              <span class="slot__time">{{ st.start|hhmm }}</span>
+              <span class="slot__hall">{{ st.hall.name }}</span>
+              <span class="slot__price">от {{ item['price']|money }}</span>
+              <span class="slot__free">свободно {{ item['free'] }} из {{ st.hall.capacity }}</span>
+            </a>
+          {% endfor %}
+        </div>
+      </section>
+    {% endfor %}
+  {% else %}
+    <p class="muted">На этот день сеансов больше нет.</p>
+  {% endif %}
+{% endblock %}

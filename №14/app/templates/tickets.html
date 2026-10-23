@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}Мои билеты{% endblock %}
+
+{% block content %}
+  <h1>Мои билеты</h1>
+
+  {% if items %}
+    {% for item in items %}
+      {% set o = item['order'] %}
+      <article class="card {% if not o.is_paid %}card--cancelled{% endif %}">
+        <div>
+          <h3>Заказ №{{ o.id }} · {{ o.showtime.movie.title }}</h3>
+          <p>{{ o.showtime.start|day }}, {{ o.showtime.start|hhmm }} · {{ o.showtime.hall.name }}</p>
+          <p>{{ o.seats|seats }}</p>
+          <p class="muted">
+            Сумма: {{ o.total|money }} ·
+            {% if not o.is_paid %}
+              возвращён
+            {% elif o.showtime.is_past() %}
+              сеанс уже начался
+            {% else %}
+              до начала: {{ item['left']|duration }}
+            {% endif %}
+          </p>
+        </div>
+        {% if item['can_cancel'] %}
+          <form method="post" action="{{ url_for('tickets.cancel', order_id=o.id) }}">
+            <button class="button--danger" type="submit">Вернуть билеты</button>
+          </form>
+        {% endif %}
+      </article>
+    {% endfor %}
+  {% else %}
+    <p class="muted">Вы ещё не купили ни одного билета. <a href="{{ url_for('schedule.index') }}">Открыть афишу</a></p>
+  {% endif %}
+{% endblock %}
